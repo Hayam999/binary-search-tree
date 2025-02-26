@@ -12,13 +12,10 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
   }
 };
 
-const tree1 = new Tree([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const tree1 = new Tree([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-prettyPrint(tree1.root);
-tree1.insert(40);
-prettyPrint(tree1.root);
-tree1.deleteItem(40);
-prettyPrint(tree1.root);
-//tree1.deleteItem(5);
-tree1.deleteItem(2);
+const callback = function (node) {
+  console.log(node.data);
+};
+tree1.preOrder(callback);
 prettyPrint(tree1.root);

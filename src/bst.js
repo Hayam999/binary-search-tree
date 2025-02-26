@@ -19,6 +19,33 @@ class Tree {
     findAndDeleteItem(this.root, value, null, "");
     return this.root;
   }
+  find(value) {
+    return findHelper(this.root, value);
+  }
+  levelOrder(callback) {
+    if (typeof callback != "function") {
+      throw new Error("parameter is not a function");
+    }
+    return levelOrderHelper([this.root], callback);
+  }
+  inOrder(callback) {
+    if (typeof callback != "function") {
+      throw new Error("parameter is not a function");
+    }
+    return inOrderHelper(this.root, callback);
+  }
+  preOrder(callback) {
+    if (typeof callback != "function") {
+      throw new Error("parameter is not a function");
+    }
+    return preOrderHelper(this.root, callback);
+  }
+  postOrder(callback) {
+    if (typeof callback != "function") {
+      throw new Error("parameter is not a function");
+    }
+    return postOrderHelper(this.root, callback);
+  }
 }
 
 function buildTree(arr) {
@@ -84,7 +111,6 @@ function handleNodeDeletion(node, parentNode, direction) {
       node.right,
       node,
       "right",
-      node,
     );
     node.data = InorderSucessor;
   }
@@ -101,21 +127,23 @@ function handleNodeDeletion(node, parentNode, direction) {
     dropLeaf(node, "left");
   }
 }
-function getAndHandleInorderSucessor(node, parentNode, direction, basicNode) {
-  if (node.right) {
-    basicNode.right = node.right;
-  }
-  return getInorderSuccessor(node, parentNode, direction);
-}
+function getAndHandleInorderSucessor(node, parentNode, direction) {
+  if (!node.left) {
+    if (node.right) {
+      parentNode.right = node.right;
+    }
+    if (direction == "right") {
+      dropLeaf(node, direction);
+    } else {
+      dropLeaf(parentNode, direction);
+    }
 
-function getInorderSuccessor(node, parentNode, direction) {
-  if (node.left == null) {
-    dropLeaf(parentNode, direction);
     return node.data;
   } else {
-    getInorderSuccessor(node.left, node, "left");
+    return getAndHandleInorderSucessor(node.left, node, "left");
   }
 }
+
 function dropLeaf(parentNode, direction) {
   if (direction == "right") {
     parentNode.right = null;
@@ -124,4 +152,58 @@ function dropLeaf(parentNode, direction) {
   }
 }
 
+function findHelper(node, value) {
+  if (node.data == value) {
+    return node;
+  } else if (node.data > value) {
+    return findHelper(node.left, value);
+  } else {
+    return findHelper(node.right, value);
+  }
+}
+
+function levelOrderHelper(queue, callback) {
+  if (queue.length == 0) {
+    return;
+  } else {
+    let currentNode = queue.shift();
+    if (currentNode.left) {
+      queue.push(currentNode.left);
+    }
+    if (currentNode.right) {
+      queue.push(currentNode.right);
+    }
+    callback(currentNode);
+
+    return levelOrderHelper(queue, callback);
+  }
+}
+
+function inOrderHelper(node, callback) {
+  if (node.left) {
+    inOrderHelper(node.left, callback);
+  }
+  callback(node);
+  if (node.right) {
+    inOrderHelper(node.right, callback);
+  }
+}
+function preOrderHelper(node, callback) {
+  callback(node);
+  if (node.left) {
+    preOrderHelper(node.left, callback);
+  }
+  if (node.right) {
+    preOrderHelper(node.right, callback);
+  }
+}
+function postOrderHelper(node, callback) {
+  if (node.left) {
+    postOrderHelper(node.left, callback);
+  }
+  if (node.right) {
+    postOrderHelper(node.right, callback);
+  }
+  callback(node);
+}
 export { Tree };
