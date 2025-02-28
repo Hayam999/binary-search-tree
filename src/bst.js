@@ -9,7 +9,11 @@ class Node {
 
 class Tree {
   constructor(arr) {
-    this.root = buildTree(arr);
+    if (Array.isArray(arr)) {
+      this.root = buildTree(arr);
+    } else {
+      this.root = arr;
+    }
   }
   insert(value) {
     insertHelper(this.root, value);
@@ -26,7 +30,7 @@ class Tree {
     if (typeof callback != "function") {
       throw new Error("parameter is not a function");
     }
-    return levelOrderHelper([this.root], callback);
+    return levelOrderHelper([this.root], callback, []);
   }
   inOrder(callback) {
     if (typeof callback != "function") {
@@ -45,6 +49,23 @@ class Tree {
       throw new Error("parameter is not a function");
     }
     return postOrderHelper(this.root, callback);
+  }
+  height(node) {
+    return heightHelper(node);
+  }
+  depth(node) {
+    return depthHelper(this.root, node);
+  }
+  isBalanced() {
+    return isBalancedHelper(this.root);
+  }
+  rebalance() {
+    if (this.isBalanced()) {
+      return this;
+    } else {
+      let balancedTree = rebalanceHelper(this);
+      return balancedTree;
+    }
   }
 }
 
@@ -162,20 +183,22 @@ function findHelper(node, value) {
   }
 }
 
-function levelOrderHelper(queue, callback) {
+function levelOrderHelper(queue, callback, result) {
   if (queue.length == 0) {
-    return;
+    return result;
   } else {
     let currentNode = queue.shift();
-    if (currentNode.left) {
-      queue.push(currentNode.left);
+    if (currentNode) {
+      result.push(callback(currentNode));
+      if (currentNode.left) {
+        queue.push(currentNode.left);
+      }
+      if (currentNode.right) {
+        queue.push(currentNode.right);
+      }
     }
-    if (currentNode.right) {
-      queue.push(currentNode.right);
-    }
-    callback(currentNode);
 
-    return levelOrderHelper(queue, callback);
+    return levelOrderHelper(queue, callback, result);
   }
 }
 
@@ -206,4 +229,82 @@ function postOrderHelper(node, callback) {
   }
   callback(node);
 }
-export { Tree };
+
+function heightHelper(node) {
+  let rightNode = subtreeHight(node.right, 0);
+  let leftNode = subtreeHight(node.left, 0);
+  if (rightNode > leftNode) {
+    return rightNode;
+  } else {
+    return leftNode;
+  }
+}
+
+function subtreeHight(node, acc) {
+  if (!node) {
+    return acc;
+  } else {
+    let leftNode = subtreeHight(node.left, acc + 1);
+    let rightNode = subtreeHight(node.right, acc + 1);
+    if (leftNode > rightNode) {
+      return leftNode;
+    } else {
+      return rightNode;
+    }
+  }
+}
+
+function depthHelper(upperNode, lowerNode) {
+  if (upperNode === lowerNode) {
+    return 0;
+  }
+  let leftDepth = subtreeDepth(upperNode, lowerNode, 0);
+  let rightDepth = subtreeDepth(upperNode, lowerNode, 0);
+
+  if (leftDepth) {
+    return leftDepth;
+  } else if (rightDepth) {
+    return rightDepth;
+  } else {
+    throw new Error("Node dosen't exist");
+  }
+}
+function subtreeDepth(upperNode, lowerNode, acc) {
+  if (upperNode === lowerNode) {
+    return acc;
+  } else if (!upperNode) {
+    return null;
+  } else {
+    let leftDepth = subtreeDepth(upperNode.left, lowerNode, acc + 1);
+    let rightDepth = subtreeDepth(upperNode.right, lowerNode, acc + 1);
+    if (leftDepth) {
+      return leftDepth;
+    } else {
+      return rightDepth;
+    }
+  }
+}
+function isBalancedHelper(node) {
+  if (!node) {
+    return true;
+  } else {
+    let rightHight = subtreeHight(node.right, 0);
+    let leftHight = subtreeHight(node.left, 0);
+
+    if (Math.abs(rightHight - leftHight) > 1) {
+      return false;
+    } else return isBalancedHelper(node.left) && isBalancedHelper(node.right);
+  }
+}
+
+function rebalanceHelper(tree) {
+  let treeToArray = tree.levelOrder(extractData);
+  let newTree = new Tree(buildTree(treeToArray));
+  return newTree;
+}
+
+const extractData = function (node) {
+  return node.data;
+};
+
+export { Tree, Node };
