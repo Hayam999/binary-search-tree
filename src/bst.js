@@ -64,7 +64,7 @@ class Tree {
       return this;
     } else {
       let balancedTree = rebalanceHelper(this);
-      return balancedTree;
+      this.root = balancedTree.root;
     }
   }
 }
